@@ -154,8 +154,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18bc9bd073ef74985b64f42c41ed4acd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 496458882}
-  mainCamera: {fileID: 1916152593}
 --- !u!50 &496458884
 Rigidbody2D:
   serializedVersion: 4

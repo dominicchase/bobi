@@ -1,32 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject player;
+    Vector3 mousePosition;
+    Rigidbody2D rb;
+    Vector2 position = new Vector2(0f, 0f);
 
-    [SerializeField]
-    private Camera mainCamera;
-
-    void Start() { }
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
 
     void Update()
     {
+        movePlayer();
+    }
+
+    void FixedUpdate()
+    {
         if (Input.GetMouseButton(0))
         {
-            player.SetActive(true);
-            movePlayer();
+            showPlayer(true);
+            rb.MovePosition(position);
         }
-        else if (!Input.GetMouseButtonUp(0))
-            player.SetActive(false);
+        else
+            showPlayer(false);
     }
+
+    #region player actions
 
     void movePlayer()
     {
-        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        worldPosition.z = 0f;
-        transform.position = worldPosition;
+        mousePosition = Input.mousePosition;
+        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        position = Vector2.Lerp(transform.position, mousePosition, 1.0f);
     }
+
+    void showPlayer(bool show)
+    {
+        GetComponent<Renderer>().enabled = show;
+    }
+
+    #endregion
 }
