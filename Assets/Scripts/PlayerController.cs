@@ -1,8 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    Vector3 mousePosition;
     Rigidbody2D rb;
     Vector2 position = new Vector2(0f, 0f);
 
@@ -23,7 +24,7 @@ public class PlayerController : MonoBehaviour
             showPlayer(true);
             rb.MovePosition(position);
         }
-        else
+        else if (!Input.GetMouseButton(0))
             showPlayer(false);
     }
 
@@ -31,9 +32,8 @@ public class PlayerController : MonoBehaviour
 
     void movePlayer()
     {
-        mousePosition = Input.mousePosition;
-        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        position = Vector2.Lerp(transform.position, mousePosition, 1.0f);
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        position = Vector2.Lerp(transform.position, mousePosition, 0.5f);
     }
 
     void showPlayer(bool show)
