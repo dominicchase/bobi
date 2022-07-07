@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody2D rb;
-    Vector2 position = new Vector2(0f, 0f);
+    Vector2 nextPoint = new Vector2(0f, 0f);
 
     void Start()
     {
@@ -14,31 +14,43 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        movePlayer();
+        getNextPoint();
     }
 
     void FixedUpdate()
     {
+        move();
+
         if (Input.GetMouseButton(0))
         {
-            showPlayer(true);
-            rb.MovePosition(position);
+            show(true);
         }
         else if (!Input.GetMouseButton(0))
-            showPlayer(false);
+        {
+            show(false);
+        }
     }
 
     #region player actions
 
-    void movePlayer()
+    void move()
     {
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        position = Vector2.Lerp(transform.position, mousePosition, 0.5f);
+        rb.MovePosition(nextPoint);
     }
 
-    void showPlayer(bool show)
+    void show(bool show)
     {
         GetComponent<Renderer>().enabled = show;
+    }
+
+    #endregion
+
+    #region player helper functions
+
+    void getNextPoint()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        nextPoint = Vector2.Lerp(transform.position, mousePosition, 0.5f);
     }
 
     #endregion
