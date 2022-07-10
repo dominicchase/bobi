@@ -7,9 +7,10 @@ public class BezierCurve : MonoBehaviour {
 
     public LineRenderer lineRenderer;
     [SerializeField] bool showLineRenderer = true;
-
     [SerializeField] AnimationCurve curve;
 
+    [SerializeField] int numPoints;
+    [SerializeField] float spacing;
     private Vector3[] smoothPoints;
     private int smoothIdx = 1;
 
@@ -19,7 +20,7 @@ public class BezierCurve : MonoBehaviour {
     void Start() {
         rb = tmp.GetComponent<Rigidbody2D>();
         // get first curve
-        smoothPoints = getCurve(getBezierPoints(), 0.1f).ToArray();
+        smoothPoints = getCurve(getBezierPoints(), spacing).ToArray();
         StartCoroutine(wander());
     }
 
@@ -30,11 +31,9 @@ public class BezierCurve : MonoBehaviour {
     IEnumerator wander() {
         while (smoothIdx < smoothPoints.Length) {
             if (smoothIdx.Equals(smoothPoints.Length - 1)) {
-                smoothPoints = getCurve(getBezierPoints(), 0.5f).ToArray();
+                smoothPoints = getCurve(getBezierPoints(), spacing).ToArray();
                 smoothIdx = 1;
             }
-
-            Debug.Log(smoothIdx);
 
             Vector2 nextPoint = Vector2.MoveTowards(
                 smoothPoints[smoothIdx - 1], 
@@ -44,9 +43,11 @@ public class BezierCurve : MonoBehaviour {
 
             rb.MovePosition(nextPoint);
                 
+            yield return new WaitForSecondsRealtime(curve.Evaluate(smoothIdx / smoothPoints.Length) + 0.01f);
+
             smoothIdx += 1;
 
-            yield return new WaitForSecondsRealtime(curve.Evaluate(smoothIdx / smoothPoints.Length) * 1000);
+            // (curve.Evaluate(smoothIdx / smoothPoints.Length));
         }
     }
 
@@ -79,14 +80,17 @@ public class BezierCurve : MonoBehaviour {
     }
 
     private Vector3[] getBezierPoints() {
-        Vector3[] bezierPoints = new Vector3[50];
+        Vector3[] anchorPoints = getAnchorPoints();
+        Vector3[] bezierPoints = new Vector3[numPoints];
 
         for (int i = 1; i < bezierPoints.Length + 1; i++) {
             float t = i / (float)bezierPoints.Length;
             bezierPoints[i - 1] = getCubicBezier(
-                transform.position,getAnchorPoints()[0], 
-                getAnchorPoints()[1], 
-                getAnchorPoints()[2], t
+                transform.position,
+                anchorPoints[0], 
+                anchorPoints[1], 
+                anchorPoints[2], 
+                t
             );
         }
 
@@ -126,7 +130,7 @@ public class BezierCurve : MonoBehaviour {
             else break;
         }
 
-        lineRenderer.positionCount = 50;
+        lineRenderer.positionCount = result.ToArray().Length;
         lineRenderer.SetPositions(result.ToArray());
 
         return result;
