@@ -1,55 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class BezierCurve : MonoBehaviour {
-
-    public LineRenderer lineRenderer;
-    [SerializeField] bool showLineRenderer = true;
-    [SerializeField] AnimationCurve curve;
-
-    [SerializeField] int numPoints;
-    [SerializeField] float spacing;
-    private Vector3[] smoothPoints;
-    private int smoothIdx = 1;
-
-    Rigidbody2D rb;
-    public GameObject tmp;
-
-    void Start() {
-        rb = tmp.GetComponent<Rigidbody2D>();
-        // get first curve
-        smoothPoints = getCurve(getBezierPoints(), spacing).ToArray();
-        StartCoroutine(wander());
-    }
+    void Start() { }
 
     void Update() { }
 
     void FixedUpdate() { }
-
-    IEnumerator wander() {
-        while (smoothIdx < smoothPoints.Length) {
-            if (smoothIdx.Equals(smoothPoints.Length - 1)) {
-                smoothPoints = getCurve(getBezierPoints(), spacing).ToArray();
-                smoothIdx = 1;
-            }
-
-            Vector2 nextPoint = Vector2.MoveTowards(
-                smoothPoints[smoothIdx - 1], 
-                smoothPoints[smoothIdx], 
-                Time.fixedDeltaTime * 0.25f
-            );
-
-            rb.MovePosition(nextPoint);
-                
-            yield return new WaitForSecondsRealtime(curve.Evaluate(smoothIdx / smoothPoints.Length) + 0.01f);
-
-            smoothIdx += 1;
-
-            // (curve.Evaluate(smoothIdx / smoothPoints.Length));
-        }
-    }
 
     private Vector2 getQuadraticBezier(Vector3 a, Vector3 b, Vector3 c, float t) {
         Vector2 p0 = Vector2.Lerp(a, b, t);
@@ -79,13 +36,15 @@ public class BezierCurve : MonoBehaviour {
         return anchorPoints;
     }
 
-    private Vector3[] getBezierPoints() {
+    public Vector3[] getBezierPoints() {
         Vector3[] anchorPoints = getAnchorPoints();
-        Vector3[] bezierPoints = new Vector3[numPoints];
+        Vector3[] bezierPoints = new Vector3[50];
 
-        for (int i = 1; i < bezierPoints.Length + 1; i++) {
+        bezierPoints[0] = transform.position;
+
+        for (int i = 1; i < bezierPoints.Length; i++) {
             float t = i / (float)bezierPoints.Length;
-            bezierPoints[i - 1] = getCubicBezier(
+            bezierPoints[i] = getCubicBezier(
                 transform.position,
                 anchorPoints[0], 
                 anchorPoints[1], 
@@ -97,10 +56,10 @@ public class BezierCurve : MonoBehaviour {
         return bezierPoints;
     }
 
-    public List<Vector3> getCurve(Vector3[] bezierPoints, float spacing) {
+    public List<Vector3> getBezierCurve(Vector3[] bezierPoints) {
         List<Vector3> result = new List<Vector3>();
 
-        spacing = spacing > 0.00001f ? spacing : 0.00001f;
+        float spacing = 0.05f > 0.00001f ? 0.05f : 0.00001f;
 
         float offset = 0;
         while (offset < 0)
@@ -129,9 +88,6 @@ public class BezierCurve : MonoBehaviour {
 
             else break;
         }
-
-        lineRenderer.positionCount = result.ToArray().Length;
-        lineRenderer.SetPositions(result.ToArray());
 
         return result;
     }
