@@ -20,5 +20,5 @@ public class PlayerManager : MonoBehaviour
 
 // to use singleton:
 // define on selected script:
-    // - Transform target;
-    // - target = gameObject.instance.player.transform;
+    // - Transform player;
+    // - player = PlayerManager.instance.player.transform;

@@ -1,55 +1,66 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class FriendlyController : MonoBehaviour
 {
-    // Rigidbody2D rb;
-    // public GameObject player;
-    // Vector2 nextPoint = new Vector2(0f, 0f);
+    GameObject player;
+    Vector3 pathToPlayer;
 
-    // Vector2 destination;
-    [SerializeField] float speed;
+    Vector3 direction;
+    Ray ray;
+    private bool collision = false;
 
-    void Start() { 
-        if (!Input.GetMouseButton(0))
-            wander();
-    }
+    [SerializeField] int speed;
+
+    #region UnityFunctions
+
+    void Start() { player = PlayerManager.instance.player; }
 
     void Update() { 
-        
+        getPathToPlayer(); 
+        handleCollision();
     }
 
-    void FixedUpdate() { }
-
-    Vector2 getDestination() {
-        Vector2 destination = new Vector2(Random.Range(-2, 2),Random.Range(-4, 4));
-        return destination;
+    void FixedUpdate() { 
+        if (Input.GetMouseButton(0) && !collision) { follow(); }
     }
 
-    void wander() {
-        Vector3 destination = getDestination();
+    #endregion
 
-        if (Vector2.Distance(transform.position, destination) < 0.5)
-            wander();
+    #region FairyActions
 
-        else 
-            transform.position = Vector2.MoveTowards(transform.position, destination, speed * Time.deltaTime);
+    void follow() { transform.position = pathToPlayer; }
+
+    #endregion
+
+    #region CollisionFunctions
+
+    private void handleCollision() {
+        direction = (player.transform.position - transform.position).normalized;
+        ray = new Ray(transform.position, direction);
+        Debug.DrawRay(transform.position, direction, Color.red);
+
+        Vector3 rightD = direction - new Vector3(Mathf.Cos(45f), Mathf.Sin(45f), 0).normalized;
+        Ray rightR = new Ray(transform.position, rightD);
+        Debug.DrawRay(transform.position, rightD, Color.blue);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, direction.x)) { 
+            collision = true;
+            Debug.Log("Hit!"); 
+        } else {
+            collision = false;
+        }
     }
 
-    #region friend actions
+    #endregion
+
+    #region HelperFunctions
+
+    void getPathToPlayer() { 
+        pathToPlayer = Vector3.Lerp(transform.position, player.transform.position, speed * Time.deltaTime
+        );
+    }
 
     #endregion
 }
-
-
-// if (Input.GetMouseButton(0)) {
-//     follow();
-//     // if (Vector2.Distance(transform.position, player.transform.position) > 0.25f) { 
-//     // }
-// }
-
-// Vector2 nextPoint = Vector2.Lerp(transform.position, player.transform.position, speed * Time.deltaTime);
-
-// rb.MovePosition(nextPoint);
